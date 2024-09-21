@@ -1,0 +1,32 @@
+# .readthedocs.yml
+
+# Version of the Read the Docs configuration file format
+version: 2
+
+# Build settings
+build:
+  # Operating system to use for the build
+  os: ubuntu-22.04
+  # Tools to install before the build starts
+  tools:
+    python: "3.11"  # Specify the Python version your project uses
+
+# Python-specific settings
+python:
+  # Specify how to install the project
+  install:
+    # Use the latest stable version of the project
+    - method: pip
+      path: .
+    # Install additional dependencies from the requirements file
+    - requirements: docs/requirements.txt
+
+# Sphinx-specific settings
+sphinx:
+  # The configuration file
+  configuration: docs/source/conf.py
+
+# Git submodules (if any)
+# git_submodules: false
+
+# Redirect URLs or other special settings can be added here

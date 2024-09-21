@@ -1,0 +1,12 @@
+pandas
+geopandas
+dask
+dask-expr
+pyarrow
+pyogrio
+pyproj
+dask-geopandas
+cartopy
+matplotlib
+sphinx
+sphinx_rtd_theme
