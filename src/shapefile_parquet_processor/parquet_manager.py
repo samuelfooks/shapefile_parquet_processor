@@ -7,9 +7,13 @@ import pyarrow.parquet as pq
 
 class ParquetManager:
     """
-    A class to manage incremental writing of DataFrames to Parquet with partitioning and indexing.
-    """
+    Manages incremental writing of DataFrames to Parquet files with partitioning and indexing.
 
+    Attributes:
+        output_dir (str): Directory to store Parquet files.
+        partition_size (int): Number of rows per Parquet partition.
+        compression (str): Compression codec for Parquet.
+    """
     def __init__(self, output_dir: str, partition_size: int = 500000, compression: str = 'snappy'):
         """
         Initialize the ParquetManager.

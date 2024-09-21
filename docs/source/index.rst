@@ -18,11 +18,11 @@ Modules
 .. toctree::
    :maxdepth: 2
 
-   shapefile_parquet_processor.logging_setup
+   shapefile_parquet_processor.setup_logging
    shapefile_parquet_processor.utils
    shapefile_parquet_processor.shapefile_to_gdf
    shapefile_parquet_processor.shapefile_to_df
-   shapefile_parquet_processor.df_corrector
+   shapefile_parquet_processor.dataframe_corrector
    shapefile_parquet_processor.parquet_manager
    shapefile_parquet_processor.shapefile_processor
    shapefile_parquet_processor.main

@@ -1,7 +1,7 @@
 # src/shapefile_processor/main.py
 import os
-from shapefile_parquet_processor.utils import clean_dir
-from shapefile_parquet_processor.shapefile_processor import ShapefileProcessor
+from utils import clean_dir
+from shapefile_processor import ShapefileProcessor
 
 def main():
     """
@@ -13,6 +13,7 @@ def main():
 
     shp_dir = os.path.join(wkdir, '../data/surveymaps')
     final_parquet_dir = os.path.join(wkdir, '../data/sbh_survey_parquet')
+    os.makedirs(final_parquet_dir, exist_ok=True)
 
     # Clean final parquet directory
     clean_dir(final_parquet_dir)

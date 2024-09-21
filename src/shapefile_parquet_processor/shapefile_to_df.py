@@ -2,7 +2,7 @@
 import logging
 import pandas as pd
 from shapefile_to_gdf import shapefile_to_gdf
-
+import os
 def shapefile_to_df(file_path: str, crs: str = 'EPSG:4326') -> pd.DataFrame:
     """
     Process a shapefile and convert it to a DataFrame with WKT geometries.

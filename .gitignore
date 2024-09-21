@@ -18,3 +18,9 @@ docs/source/_build/
 # Virtual environments
 venv/
 .env/
+
+# data
+data/
+
+# files
+*.shp

@@ -1,15 +1,21 @@
 # src/shapefile_processor/shapefile_processor.py
 import os
 import logging
-from shapefile_parquet_processor.setup_logging import setup_logging
-from shapefile_parquet_processor.utils import clean_dir
-from shapefile_parquet_processor.shapefile_to_df import shapefile_to_df
-from shapefile_parquet_processor.dataframe_corrector import DataFrameCorrector
-from shapefile_parquet_processor.parquet_manager import ParquetManager
+from setup_logging import setup_logging
+from utils import clean_dir
+from shapefile_to_df import shapefile_to_df
+from shapefile_to_gdf import shapefile_to_gdf
+from dataframe_corrector import DataFrameCorrector
+from parquet_manager import ParquetManager
 
 class ShapefileProcessor:
     """
-    Main class to orchestrate shapefile processing and Parquet writing.
+    Orchestrates the processing of shapefiles into DataFrames and Parquet files.
+
+    Attributes:
+        shp_dir (str): Directory containing shapefiles.
+        final_parquet_dir (str): Directory for the final Parquet files.
+        log_dir (str): Directory for log files.
     """
 
     def __init__(self, shp_dir: str, final_parquet_dir: str, log_dir: str):
@@ -50,8 +56,6 @@ class ShapefileProcessor:
 
         :param shapefile_paths: List of shapefile paths.
         """
-        from shapefile_parquet_processor.shapefile_to_df import shapefile_to_df
-
         for file_path in shapefile_paths:
             logging.info(f'Processing shapefile: {os.path.basename(file_path)}')
             df = shapefile_to_df(file_path)
@@ -75,7 +79,7 @@ class ShapefileProcessor:
         # Finalize writing any remaining data
         self.parquet_manager.finalize()
 
-    def run(self, country_codes: list = ['IT', 'DK', 'FR', 'GB', 'PT']):
+    def run(self, country_codes: list = ['IT', 'DK', 'PT']):
         """
         Execute the shapefile processing workflow.
 
