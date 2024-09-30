@@ -5,7 +5,7 @@ from .shapefile_to_gdf import shapefile_to_gdf
 from .shapefile_to_df import shapefile_to_df
 from .dataframe_corrector import DataFrameCorrector
 from .parquet_manager import ParquetManager
-from .shapefile_processor import ShapefileProcessor
+from .shapefile_to_parquet import ShapefileProcessor
 
 __all__ = [
     'setup_logging',
