@@ -10,3 +10,4 @@ cartopy
 matplotlib
 sphinx
 sphinx_rtd_theme
+contextily
