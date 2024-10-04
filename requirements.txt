@@ -1,6 +1,6 @@
 pandas
 geopandas
-dask
+dask[complete]
 dask-expr
 pyarrow
 pyogrio

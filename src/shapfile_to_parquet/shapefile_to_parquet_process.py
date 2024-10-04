@@ -26,11 +26,11 @@ import dask.dataframe as dd
 from typing import List
 
 class ShapefileProcessor:
-    def __init__(self, input_dir: str, output_dir: str, logger: logging.Logger, file_name_selectors: List[str] = None):
+    def __init__(self, input_dir: str, output_dir: str, logger: logging.Logger, file_name_selectors: List[str]):
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.logger = logger
-        self.file_name_selectors = file_name_selectors if file_name_selectors else []
+        self.file_name_selectors = file_name_selectors
         self.failed_files = []
         self.clean_dir()
 
@@ -55,11 +55,12 @@ class ShapefileProcessor:
         shapefiles = []
         for file in os.listdir(self.input_dir):
             if file.endswith('.shp'):
-                if not self.file_name_selectors:
+                if len(self.file_name_selectors) == 0:
                     shapefiles.append(os.path.join(self.input_dir, file))
-                    continue
-                if any(code in file for code in self.file_name_selectors):
+ 
+                elif any(code in file for code in self.file_name_selectors):
                     shapefiles.append(os.path.join(self.input_dir, file))
+                 
         self.logger.info(f'Found {len(shapefiles)} shapefiles to process.')
         return shapefiles
 
@@ -200,20 +201,7 @@ class FailedFileCorrector:
         for failed_file in self.failed_files.copy():  # Use copy to modify the list while iterating
             self.correct_failed_file(failed_file)
 
-import math
 
-class ParquetConcatenator:
-    def __init__(self, output_dir: str, logger: logging.Logger, chunk_size_mb: int = 500):
-        self.output_dir = output_dir
-        self.logger = logger
-        self.chunk_size_mb = chunk_size_mb
-
-    def get_total_size(self, parquet_paths: List[str]) -> int:
-        """Returns the total size in bytes of all parquet files."""
-        total_size = 0
-        for path in parquet_paths:
-            total_size += os.path.getsize(path)
-        return total_size
 
 import os
 import math
@@ -222,7 +210,7 @@ import dask.dataframe as dd
 from typing import List, Dict
 
 class ParquetConcatenator:
-    def __init__(self, output_dir: str, logger: logging.Logger, chunk_size_mb: int = 200):
+    def __init__(self, output_dir: str, logger: logging.Logger, chunk_size_mb: int = 400):
         self.output_dir = output_dir
         self.logger = logger
         self.chunk_size_mb = chunk_size_mb
@@ -287,12 +275,12 @@ class ParquetConcatenator:
 
 
 class WorkflowManager:
-    def __init__(self, input_dir: str, output_dir: str, log_dir: str, file_name_selectors: List[str] = None):
+    def __init__(self, input_dir: str, output_dir: str, log_dir: str, file_name_selectors: List[str] ):
         self.logger_instance = Logger(log_dir)
         self.logger = self.logger_instance.get_logger()
         self.input_dir = input_dir
         self.output_dir = output_dir
-        self.file_name_selectors = file_name_selectors if file_name_selectors else []
+        self.file_name_selectors = file_name_selectors
         self.shapefile_processor = ShapefileProcessor(input_dir, output_dir, self.logger, self.file_name_selectors)
         self.failed_file_corrector = FailedFileCorrector(input_dir, output_dir, self.logger, self.shapefile_processor.failed_files)
         self.parquet_concatenator = ParquetConcatenator(output_dir, self.logger)
