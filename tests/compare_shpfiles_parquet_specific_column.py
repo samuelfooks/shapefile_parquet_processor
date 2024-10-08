@@ -84,6 +84,7 @@ def compare_geometries_with_parquet(shapefile_processor, parquet_path):
     # Read the parquet file into a Dask DataFrame
     dgdf = read_parquet(parquet_path)
 
+    columns = 
     # Check for geometries and compare gui values in the parquet file
     for _, row in all_rows_gdf.iterrows():
         wkt_geom = row.geometry.wkt

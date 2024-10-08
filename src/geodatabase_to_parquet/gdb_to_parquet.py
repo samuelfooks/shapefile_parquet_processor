@@ -195,12 +195,12 @@ def gdb_to_parquet():
     converts each layer to GeoParquet, and uploads to S3.
     """
     wkdir = os.path.abspath(os.getcwd())
-    zip_url = 'https://s3.waw3-1.cloudferro.com/emodnet/emodnet_native/emodnet_human_activities/energy/wind_farms_points/EMODnet_HA_Energy_WindFarms_20240508.zip'
-    zip_url = 'https://s3.waw3-1.cloudferro.com/emodnet/emodnet_native/emodnet_geology/seabed_substrate/multiscale_folk_5/EMODnet_GEO_Seabed_Substrate_All_Res.zip'
-    zip_url = 'https://s3.waw3-1.cloudferro.com/emodnet/emodnet_seabed_habitats/12549/EUSeaMap_2023.zip
+    #zip_url = 'https://s3.waw3-1.cloudferro.com/emodnet/emodnet_native/emodnet_human_activities/energy/wind_farms_points/EMODnet_HA_Energy_WindFarms_20240508.zip'
+    #zip_url = 'https://s3.waw3-1.cloudferro.com/emodnet/emodnet_native/emodnet_geology/seabed_substrate/multiscale_folk_5/EMODnet_GEO_Seabed_Substrate_All_Res.zip'
+    zip_url = 'https://s3.waw3-1.cloudferro.com/emodnet/emodnet_seabed_habitats/12549/EUSeaMap_2023.zip'
     extract_to = os.path.join(wkdir, 'data')
-    geodatabase_name = 'EMODnet_HA_Energy_WindFarms_20240508.gdb'  # Specify the desired GDB name
-    geodatabase_name = 'EMODnet_Seabed_Substrate_1M.gdb'
+    # geodatabase_name = 'EMODnet_HA_Energy_WindFarms_20240508.gdb'  # Specify the desired GDB name
+    # geodatabase_name = 'EMODnet_Seabed_Substrate_1M.gdb'
     geodatabase_name = 'EUSeaMap_2023.gdb'
     os.makedirs(extract_to, exist_ok=True)
     output_dir = os.path.join(wkdir, 'output_parquet')
@@ -237,10 +237,11 @@ def main():
     gdb_to_parquet()
 
 if __name__ == '__main__':
-    n_workers = 5
+    worker_threads = 4
     
-    with LocalCluster(n_workers=n_workers, threads_per_worker=1, memory_limit='4GB') as cluster:
+    with LocalCluster(n_workers=worker_threads, threads_per_worker=1, memory_limit='4GiB') as cluster:
         client = Client(cluster)
-        logger.info(f"LocalCluster started with {n_workers} workers")
+        print(client.dashboard_link)
+        logger.info(f"LocalCluster started with {worker_threads} workers")
         main()
         client.close()

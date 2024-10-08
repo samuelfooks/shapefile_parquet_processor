@@ -22,6 +22,7 @@ def make_check_logger(wkdir):
     )
     logging.getLogger().addHandler(logging.StreamHandler())
     return logging.getLogger()
+
 class ShapefileParquetChecker:
 
     def __init__(self, shapefile_dir, failed_files=None):
@@ -51,7 +52,7 @@ class ShapefileParquetChecker:
         """
         for path in shapefile_paths:
             # Placeholder for actual shapefile processing logic
-            check_logger.info(f'Processing shapefile: {path}')
+            check_logger.info(f'adding shapefile to check: {path}')
 
     def run(self, file_name_selector=None):
         """
@@ -107,7 +108,7 @@ if __name__ == "__main__":
     wkdir = os.path.dirname(os.path.abspath(__file__))
     check_logger = make_check_logger(wkdir)
     shapefile_dir = f'{wkdir}/../src/data/surveymaps'
-    PARQUET_PATH = f'{wkdir}/../src/data/parquet/concatenated_chunks'
+    PARQUET_PATH = f'{wkdir}/../src/data/parquet/concatenated.parquet'
     failed_files = f'{wkdir}/../src/data/logs/failed_files.csv'
     
     shapefile_processor = ShapefileParquetChecker(shapefile_dir, failed_files)

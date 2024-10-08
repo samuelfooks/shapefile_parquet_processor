@@ -2,6 +2,7 @@
 
 import os
 import logging
+from dask.distributed import Client, LocalCluster
 
 class Logger:
     def __init__(self, log_dir: str, log_file: str = 'shapefile_processing.log'):
