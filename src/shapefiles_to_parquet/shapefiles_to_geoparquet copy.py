@@ -14,17 +14,9 @@ import json
 from dask.distributed import Client, LocalCluster
 import json
 
-
+# Configuration Loader
 def load_config(file_path: str):
-    """
-    Load the configuration from a JSON file.
-
-    :param file_path: Path to the JSON configuration file.
-    :type file_path: str
-    :raises FileNotFoundError: If the configuration file does not exist.
-    :return: Configuration dictionary.
-    :rtype: dict
-    """
+    """Load the configuration from a JSON file."""
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Configuration file not found: {file_path}")
     
@@ -32,14 +24,8 @@ def load_config(file_path: str):
         config = json.load(f)
     return config
 
-
+# Main Function
 def main():
-    """
-    Main function to execute the workflow.
-
-    This function sets up the working directory, loads the configuration,
-    initializes the workflow manager, and runs the workflow.
-    """
     wkdir = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(wkdir, "config.json")  # Updated path construction
     try:
@@ -74,28 +60,13 @@ def main():
     )
     workflow_manager.run_workflow()
     # Optionally, close the Dask client
-
-
 class Logger:
-    """
-    Logger class to handle logging configurations.
-
-    :param log_dir: Directory where log files will be stored.
-    :type log_dir: str
-    :param log_file: Name of the log file. Defaults to 'shapefile_processing.log'.
-    :type log_file: str, optional
-    """
     def __init__(self, log_dir: str, log_file: str = 'shapefile_processing.log'):
         self.log_dir = log_dir
         self.log_file = log_file
         self.setup_logging()
 
     def setup_logging(self):
-        """
-        Set up logging configuration.
-
-        Creates the log directory if it doesn't exist and configures the logging settings.
-        """
         os.makedirs(self.log_dir, exist_ok=True)
         logging.basicConfig(
             filename=os.path.join(self.log_dir, self.log_file),
@@ -106,55 +77,27 @@ class Logger:
         logging.getLogger().addHandler(logging.StreamHandler())
     
     def get_logger(self):
-        """
-        Retrieve the configured logger.
-
-        :return: Configured logger instance.
-        :rtype: logging.Logger
-        """
         return logging.getLogger()
 
-
-def clean_dir(dir_path: str):
-    """
-    Clean the specified directory by removing all files and empty subdirectories.
-
-    If the directory does not exist, it is created.
-
-    :param dir_path: Path to the directory to clean.
-    :type dir_path: str
-    """
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
+def clean_dir(dir):
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+        
         return
 
-    for root, dirs, files in os.walk(dir_path, topdown=False):
+    for root, dirs, files in os.walk(dir, topdown=False):
         # Remove all files
         for file in files:
             os.remove(os.path.join(root, file))
         
         # Remove all directories
         for dir in dirs:
-            dir_path_full = os.path.join(root, dir)
-            if not os.listdir(dir_path_full):  # Check if the directory is empty
-                os.rmdir(dir_path_full)
+            dir_path = os.path.join(root, dir)
+            if not os.listdir(dir_path):  # Check if the directory is empty
+                os.rmdir(dir_path)
 
 
 class ShapefileProcessor:
-    """
-    Processor for handling shapefiles.
-
-    :param input_dir: Directory containing input shapefiles.
-    :type input_dir: str
-    :param output_dir: Directory where processed Parquet files will be stored.
-    :type output_dir: str
-    :param logger: Logger instance for logging.
-    :type logger: logging.Logger
-    :param file_name_selectors: List of selectors to filter shapefiles by name.
-    :type file_name_selectors: List[str], optional
-    :param columns_to_convert: List of columns to convert in the shapefiles.
-    :type columns_to_convert: List[str], optional
-    """
     def __init__(self, input_dir: str, output_dir: str, logger: logging.Logger, file_name_selectors: List[str] = None, columns_to_convert: List[str] = None):
         self.input_dir = input_dir
         self.output_dir = output_dir
@@ -164,14 +107,6 @@ class ShapefileProcessor:
         self.failed_files = []
 
     def make_list(self) -> List[str]:
-        """
-        Create a list of shapefile paths to process.
-
-        Filters shapefiles based on the provided file name selectors.
-
-        :return: List of shapefile paths.
-        :rtype: List[str]
-        """
         shapefiles = []
         for file in os.listdir(self.input_dir):
             if file.endswith('.shp'):
@@ -184,14 +119,6 @@ class ShapefileProcessor:
         return shapefiles
 
     def clean_geometry(self, gdframe: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-        """
-        Clean the geometry column by removing null geometries.
-
-        :param gdframe: GeoDataFrame to clean.
-        :type gdframe: gpd.GeoDataFrame
-        :return: Cleaned GeoDataFrame without null geometries.
-        :rtype: gpd.GeoDataFrame
-        """
         # drop null geometries
         geoms = gdframe['geometry']
         # report null geometries
@@ -202,60 +129,38 @@ class ShapefileProcessor:
         return gdframe
 
     def select_columns(self, gdframe: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-        """
-        Select and prepare specified columns for conversion.
-
-        Adds missing columns with None values if they do not exist in the GeoDataFrame.
-
-        :param gdframe: GeoDataFrame to select columns from.
-        :type gdframe: gpd.GeoDataFrame
-        :return: GeoDataFrame with selected columns and geometry.
-        :rtype: gpd.GeoDataFrame
-        """
         for col in self.columns_to_convert:
             if col not in gdframe.columns:
-                self.logger.warning(f'Column {col} not found in shapefile. Filling with None')
+                self.logger.warning(f'Column {col} not found in shapefile. filling with None')
                 gdframe[col] = None
         gdframe = gdframe[self.columns_to_convert + ['geometry']]  
         return gdframe
 
     def align_dtypes(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Align data types of the DataFrame columns for consistency and efficiency.
-
-        Downcasts numerical types to reduce memory usage and ensures compatibility with Dask.
-
-        :param df: DataFrame to align data types.
-        :type df: pd.DataFrame
-        :return: DataFrame with aligned data types.
-        :rtype: pd.DataFrame
-        """
         # Ensure consistent data types, downcast to reduce memory usage, use float for NaN and dask compatibility
         for col in df.columns:
             if df[col].dtype == 'object':
                 df[col] = df[col].astype(str)
-            elif df[col].dtype in ['int64', 'int32']:
+            elif df[col].dtype == 'int64' or df[col].dtype == 'int32':
                 df[col] = df[col].astype('float32')
                 # check for None values
                 if df[col].isnull().any():
                     df[col] = df[col].astype('float32')
+
             elif df[col].dtype == 'float64':
                 df[col] = df[col].astype('float32')
+            
             # uniform datetime to datetime64[ms]
             elif 'datetime' in str(df[col].dtype):
                 df[col] = pd.to_datetime(df[col], errors='coerce')
                 df[col] = df[col].dt.strftime('%Y-%m-%d %H:%M:%S')
                 df[col] = pd.to_datetime(df[col], errors='coerce')
+
         # make into dask dataframe, write to parquet. Append to existing parquet files,
         return df
 
-    def process_shapefile(self, file: str):
-        """
-        Process a single shapefile and convert it to Parquet format.
 
-        :param file: Path to the shapefile to process.
-        :type file: str
-        """
+    def process_shapefile(self, file: str):
         self.logger.info(f'Processing shapefile: {file}')
         try:
             gdf = gpd.read_file(file)
@@ -297,12 +202,6 @@ class ShapefileProcessor:
             self.failed_files.append(schema_failed_file)
 
     def process_all_shapefiles(self):
-        """
-        Process all shapefiles found in the input directory.
-
-        Iterates through the list of shapefiles and processes each one.
-        Records any failed file processing attempts.
-        """
         shapefiles = self.make_list()
         for file in shapefiles:
             self.process_shapefile(file)
@@ -312,18 +211,6 @@ class ShapefileProcessor:
 
 
 class ParquetConcatenator:
-    """
-    Concatenates multiple Parquet files into larger chunks.
-
-    :param pq_input_dir: Directory containing input Parquet files.
-    :type pq_input_dir: str
-    :param concat_dir: Directory where concatenated Parquet files will be stored.
-    :type concat_dir: str
-    :param logger: Logger instance for logging.
-    :type logger: logging.Logger
-    :param chunk_size_mb: Maximum size of each concatenated chunk in megabytes. Defaults to 400.
-    :type chunk_size_mb: int, optional
-    """
     def __init__(self, pq_input_dir: str, concat_dir: str, logger: logging.Logger, chunk_size_mb: int = 400):
         self.pq_input_dir = pq_input_dir
         self.concat_dir = concat_dir
@@ -332,26 +219,13 @@ class ParquetConcatenator:
         self.failed_files = []
 
     def get_total_size(self, parquet_paths: List[str]) -> int:
-        """
-        Calculate the total size of the given Parquet files.
-
-        :param parquet_paths: List of Parquet file paths.
-        :type parquet_paths: List[str]
-        :return: Total size in bytes.
-        :rtype: int
-        """
+        """Returns the total size in bytes of all parquet files."""
         total_size = 0
         for path in parquet_paths:
             total_size += os.path.getsize(path)
         return total_size
 
     def concat_parquets_in_chunks(self):
-        """
-        Concatenate Parquet files into larger chunks based on the specified chunk size.
-
-        Processes each Parquet file, concatenates them, and writes the concatenated chunks
-        to the designated directory. Handles any failures during the concatenation process.
-        """
         parquet_files = [f for f in os.listdir(self.pq_input_dir) if f.endswith('.parquet')]
         if not parquet_files:
             self.logger.error('No Parquet files found to concatenate.')
@@ -421,20 +295,7 @@ class ParquetConcatenator:
                     f.write(file + '\n')
             self.logger.error(f'List of failed files written to {self.concat_dir}/failed_files.txt')
 
-
 class GeoparquetTransformer:
-    """
-    Transformer for converting concatenated Parquet files to GeoParquet format.
-
-    :param concat_dir: Directory containing concatenated Parquet files.
-    :type concat_dir: str
-    :param geopq_dir: Directory where GeoParquet files will be stored.
-    :type geopq_dir: str
-    :param logger: Logger instance for logging.
-    :type logger: logging.Logger
-    :param chunk_size_mb: Chunk size in megabytes for processing partitions. Defaults to 500.
-    :type chunk_size_mb: int, optional
-    """
     def __init__(self, concat_dir: str, geopq_dir: str, logger: logging.Logger, chunk_size_mb: int = 500):
         self.concat_dir = concat_dir
         self.geopq_dir = geopq_dir
@@ -443,12 +304,6 @@ class GeoparquetTransformer:
         self.chunk_size_mb = chunk_size_mb
 
     def process_concatenated_partitions(self):
-        """
-        Process concatenated Parquet file partitions and convert them to GeoParquet format.
-
-        Converts the geometry from WKT to Shapely geometries, creates GeoDataFrames,
-        and saves each partition as a GeoParquet file.
-        """
         concat_parquet = os.path.join(self.concat_dir, 'concatenated.parquet')
         self.logger.info(f'Processing concatenated Parquet file: {concat_parquet}')
         # open the concatenated parquet file
@@ -461,23 +316,13 @@ class GeoparquetTransformer:
             gdf = gdf.set_crs(epsg=4326)
             return gdf
         
-        # Map the conversion function across all partitions using Dask's map_partitions
+         # Map the conversion function across all partitions using Dask's map_partitions
         self.logger.info('Mapping partitions to GeoDataFrames...')
         meta = gpd.GeoDataFrame(columns=ddf.columns, geometry='geometry').set_crs(epsg=4326)
         gdf_ddf = ddf.map_partitions(convert_partition_to_gdf, meta=meta)
 
         # Save each partition as a GeoParquet file
         def save_partition(partition, i):
-            """
-            Save a single GeoDataFrame partition to a GeoParquet file.
-
-            :param partition: GeoDataFrame partition to save.
-            :type partition: gpd.GeoDataFrame
-            :param i: Partition index.
-            :type i: int
-            :return: Path to the saved GeoParquet file or None if failed.
-            :rtype: str or None
-            """
             try:
                 partition_path = os.path.join(self.geopq_dir, f'geoparquet_partition_{i}.parquet')
                 partition.to_parquet(partition_path, engine='pyarrow', compression='snappy')
@@ -501,18 +346,12 @@ class GeoparquetTransformer:
         self.logger.info(f'Successfully processed {len(self.successful_partitions)} partitions.')
         
     def concatenate_geoparquet_partitions(self):
-        """
-        Concatenate all successfully processed GeoParquet partitions into a single GeoParquet file.
-
-        Combines all partitions into a single GeoDataFrame and saves it as a consolidated GeoParquet file.
-        """
         successful_partitions = self.successful_partitions
         # Combine all successfully processed GeoParquet partitions into a single GeoDataFrame
         if successful_partitions:
             combined_gdf = dgpd.read_parquet(successful_partitions)
         else:
             self.logger.error('No partitions were successfully processed.')
-            return
         
         # Write the final combined GeoDataFrame to a Parquet file
         final_parquet_path = os.path.join(self.geopq_dir, '..', 'concatenated_geoparquet.parquet')
@@ -528,23 +367,9 @@ class GeoparquetTransformer:
         )
         
         self.logger.info('Successfully concatenated all shapefiles into a single GeoParquet file.')
-
+        
 
 class WorkflowManager:
-    """
-    Manager for orchestrating the entire workflow of processing shapefiles to GeoParquet.
-
-    :param input_dir: Directory containing input shapefiles.
-    :type input_dir: str
-    :param output_dir: Directory where output files will be stored.
-    :type output_dir: str
-    :param log_dir: Directory where log files will be stored.
-    :type log_dir: str
-    :param file_name_selectors: List of selectors to filter shapefiles by name.
-    :type file_name_selectors: List[str], optional
-    :param columns_to_convert: List of columns to convert in the shapefiles.
-    :type columns_to_convert: List[str], optional
-    """
     def __init__(self, input_dir: str, output_dir: str, log_dir: str, file_name_selectors: List[str] = None, columns_to_convert: List[str] = None):
         self.logger_instance = Logger(log_dir)
         self.logger = self.logger_instance.get_logger()
@@ -555,29 +380,22 @@ class WorkflowManager:
         self.concat_pq = f"{self.output_dir}/concat_pq"
         self.geopq_dir = f"{self.output_dir}/geopq_parts"
         self.file_name_selectors = file_name_selectors if file_name_selectors else []
-        self.shapefile_processor = ShapefileProcessor(input_dir, self.shp_pq, self.logger, self.file_name_selectors, columns_to_convert)
+        self.shapefile_processor = ShapefileProcessor(input_dir,self.shp_pq, self.logger, self.file_name_selectors, columns_to_convert)
         self.parquet_concatenator = ParquetConcatenator(self.shp_pq, self.concat_pq, self.logger)
         self.geoparquet_consolidator = GeoparquetTransformer(self.concat_pq, self.geopq_dir, self.logger) 
         
     def run_workflow(self):
-        """
-        Execute the entire workflow: processing shapefiles, concatenating Parquet files,
-        and transforming them into GeoParquet format.
-        """
         self.shapefile_processor.process_all_shapefiles()
         self.parquet_concatenator.concat_parquets_in_chunks()
         self.geoparquet_consolidator.process_concatenated_partitions()
         self.geoparquet_consolidator.concatenate_geoparquet_partitions()
 
-
 if __name__ == '__main__':
-    """
-    Entry point for the script.
-
-    Initializes a local Dask cluster and executes the main workflow.
-    """
+    
     with LocalCluster(n_workers=2, threads_per_worker=2) as cluster:
         client = Client(cluster)
         print(f"LocalCluster started")
         main()
         client.close()
+
+    

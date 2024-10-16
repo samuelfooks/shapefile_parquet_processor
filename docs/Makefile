@@ -3,7 +3,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-SPHINXPROJ    = shapefile_parquet_processor
+SPHINXPROJ    = vector_to_parquet_processor
 SOURCEDIR     = source
 BUILDDIR      = build
 

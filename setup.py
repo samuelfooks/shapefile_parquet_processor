@@ -24,7 +24,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'shp_parprocessor=shapefile_parquet_processor.main:main',
+            'shp_par_processor=shapefiles_to_geoparquet:main',
         ],
     },
     classifiers=[

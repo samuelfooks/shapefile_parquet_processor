@@ -4,7 +4,7 @@ import sys
 import sphinx_rtd_theme
 sys.path.insert(0, os.path.abspath('../../src'))
 
-project = 'shapefile_processor'
+project = 'vector_to_parquet_processor'
 author = 'Samuel Fooks'
 release = '0.1.0'
 
