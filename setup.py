@@ -2,9 +2,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='shapefile_parquet_processor',
+    name='vector_to_parquet_processor',
     version='0.1.0',
-    description='A module for processing shapefiles into DataFrames and Parquet files.',
+    description='A module for processing geospatial vector files into Parquet and Geoparquet',
     author='Samuel Fooks',
     author_email='samuel.fooks@gmail.com',
     packages=find_packages(where='src'),
@@ -24,7 +24,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'shp_par_processor=shapefiles_to_geoparquet:main',
+            'shape_geoparquet_processor=shapefiles_to_parquet:shapefiles_to_geoparquet.py',
         ],
     },
     classifiers=[
