@@ -14,13 +14,14 @@ docs/source/_build/
 
 # Logs
 *.log
-
+*.dat
 # Virtual environments
 venv/
 .env/
 
 # data
 data/
+archive/
 
 # files
 *.shp

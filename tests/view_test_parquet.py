@@ -81,6 +81,7 @@ def view_test_parquet(parquet_path, shp_dir):
             break
 
 if __name__ == "__main__":
-    PARQUET_PATH = '../data/sbh_survey_parquet/combined_data_pyarrow.parquet'
+    wkdir = 
+    PARQUET_PATH = '../src/data/parquet/geopq_parts/geoparquet_partition_0.parquet'
     SHP_DIR = '../data/survey_maps'
     view_test_parquet(PARQUET_PATH, SHP_DIR)

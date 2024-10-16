@@ -1,7 +1,0 @@
-{
-    "input_dir": "../data/surveymaps",
-    "output_dir": "../data/parquet",
-    "log_dir": "../data/logs",
-    "file_name_selectors": ["GB"],
-    "steps": [1,2,3,4]
-}
