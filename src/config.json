@@ -1,0 +1,7 @@
+{
+    "input_dir": "../data/surveymaps",
+    "output_dir": "../data/parquet",
+    "log_dir": "../data/logs",
+    "file_name_selectors": ["IT", "GB"],
+    "columns_to_convert" : ["hab_type", "orig_hab", "sum_conf", "t_relate", "comp"]
+}
